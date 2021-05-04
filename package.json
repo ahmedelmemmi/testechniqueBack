@@ -4,10 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon ./build",
+    "start": "node ./build",
     "build": "tsc",
     "watch": "tsc -w",
-    "dev": "nodemon ./build"
+    "dev": "node ./build"
   },
   "keywords": [],
   "author": "",
