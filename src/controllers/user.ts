@@ -1,11 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
+import mongoose from 'mongoose';
 import bcryptjs from 'bcryptjs';
 import logging from '../config/logging';
+import User from '../models/userModel';
 import signJWT from '../functions/signJTW';
-import { Connect, Query } from '../config/mysql';
-import IUser from '../interfaces/user';
-import IMySQLResult from '../interfaces/result';
-import pool from '../database';
 
 const NAMESPACE = 'User';
 
@@ -18,7 +16,7 @@ const validateToken = (req: Request, res: Response, next: NextFunction) => {
 };
 
 const register = (req: Request, res: Response, next: NextFunction) => {
-    let { username, password } = req.body;
+    let { username, password,email,telephone,DateNaissance } = req.body;
 
     bcryptjs.hash(password, 10, (hashError, hash) => {
         if (hashError) {
@@ -28,28 +26,23 @@ const register = (req: Request, res: Response, next: NextFunction) => {
             });
         }
 
-        let query = `INSERT INTO Users (username, password) VALUES ("${username}", "${hash}")`;
+        const _user = new User({
+            _id: new mongoose.Types.ObjectId(),
+            username,
+            password: hash,
+            email,
+            telephone,
+            DateNaissance
+        });
 
-        Connect()
-            .then((connection) => {
-                Query<IMySQLResult>(connection, query)
-                    .then((result) => {
-                        logging.info(NAMESPACE, `User with id ${result.insertId} inserted.`);
-
-                        return res.status(201).json(result);
-                    })
-                    .catch((error) => {
-                        logging.error(NAMESPACE, error.message, error);
-
-                        return res.status(500).json({
-                            message: error.message,
-                            error
-                        });
-                    });
+        return _user
+            .save()
+            .then((user) => {
+                return res.status(201).json({
+                    user
+                });
             })
             .catch((error) => {
-                logging.error(NAMESPACE, error.message, error);
-
                 return res.status(500).json({
                     message: error.message,
                     error
@@ -57,92 +50,61 @@ const register = (req: Request, res: Response, next: NextFunction) => {
             });
     });
 };
-const getOne= async (req: Request, res: Response) => {
-    const { username } = req.params;
-    const users = await pool.query('SELECT * FROM users WHERE username = ?', [username]);
-    console.log(users.length);
-    if (users.length > 0) {
-        return res.json(users[0]);
-    }
-    res.status(404).json({ text: "user doesn't exits" });
-}
 
 const login = (req: Request, res: Response, next: NextFunction) => {
     let { username, password } = req.body;
 
-    let query = `SELECT * FROM users WHERE username = '${username}'`;
+    User.find({ username })
+        .exec()
+        .then((users) => {
+            if (users.length !== 1) {
+                return res.status(401).json({
+                    message: 'Unauthorized'
+                });
+            }
 
-    Connect()
-        .then((connection) => {
-            Query<IUser[]>(connection, query)
-                .then((users) => {
-                    bcryptjs.compare(password, users[0].password, (error, result) => {
-                        if (error) {
-                            return res.status(401).json({
-                                message: 'Password Mismatch'
+            bcryptjs.compare(password, users[0].password, (error, result) => {
+                if (error) {
+                    return res.status(401).json({
+                        message: 'Password Mismatch'
+                    });
+                } else if (result) {
+                    signJWT(users[0], (_error, token) => {
+                        if (_error) {
+                            return res.status(500).json({
+                                message: _error.message,
+                                error: _error
                             });
-                        } else if (result) {
-                            signJWT(users[0], (_error, token) => {
-                                if (_error) {
-                                    return res.status(401).json({
-                                        message: 'Unable to Sign JWT',
-                                        error: _error
-                                    });
-                                } else if (token) {
-                                    return res.status(200).json({
-                                        message: 'Auth Successful',
-                                        token,
-                                        user: users[0]
-                                    });
-                                }
+                        } else if (token) {
+                            return res.status(200).json({
+                                message: 'Auth successful',
+                                token: token,
+                                user: users[0]
                             });
                         }
                     });
-                })
-                .catch((error) => {
-                    logging.error(NAMESPACE, error.message, error);
-
-                    return res.status(500).json({
-                        message: error.message,
-                        error
-                    });
-                });
+                }
+            });
         })
-        .catch((error) => {
-            logging.error(NAMESPACE, error.message, error);
-
-            return res.status(500).json({
-                message: error.message,
-                error
+        .catch((err) => {
+            console.log(err);
+            res.status(500).json({
+                error: err
             });
         });
 };
-
 
 const getAllUsers = (req: Request, res: Response, next: NextFunction) => {
-    let query = `SELECT id, username FROM users`;
-
-    Connect()
-        .then((connection) => {
-            Query<IUser[]>(connection, query)
-                .then((users) => {
-                    return res.status(200).json({
-                        users,
-                        count: users.length
-                    });
-                })
-                .catch((error) => {
-                    logging.error(NAMESPACE, error.message, error);
-
-                    return res.status(500).json({
-                        message: error.message,
-                        error
-                    });
-                });
+    User.find()
+        .select('-password')
+        .exec()
+        .then((users) => {
+            return res.status(200).json({
+                users: users,
+                count: users.length
+            });
         })
         .catch((error) => {
-            logging.error(NAMESPACE, error.message, error);
-
             return res.status(500).json({
                 message: error.message,
                 error
@@ -150,4 +112,4 @@ const getAllUsers = (req: Request, res: Response, next: NextFunction) => {
         });
 };
 
-export default { validateToken, register, login,getOne, getAllUsers };
+export default { validateToken, register, login, getAllUsers };

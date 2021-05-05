@@ -2,16 +2,26 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const MYSQL_HOST = process.env.MYSQL_HOST || 'localhost';
-const MYSQL_DATABASE = process.env.MYSQL_DATABASE || 'posts';
-const MYSQL_USER = process.env.MYSQL_HOST || 'test';
-const MYSQL_PASS = process.env.MYSQL_HOST || 'test';
+const MONGO_OPTIONS = {
+    useUnifiedTopology: true,
+    useNewUrlParser: true,
+    socketTimeoutMS: 30000,
+    keepAlive: true,
+    poolSize: 50,
+    autoIndex: false,
+    retryWrites: false
+};
 
-const MYSQL = {
-    host: MYSQL_HOST,
-    database: MYSQL_DATABASE,
-    user: MYSQL_USER,
-    pass: MYSQL_PASS
+const MONGO_USERNAME = process.env.MONGO_USERNAME || '12345';
+const MONGO_PASSWORD = process.env.MONGO_USERNAME || '12345';
+const MONGO_HOST = process.env.MONGO_URL || `testtechnique.mdwan.mongodb.net/testtechnique?retryWrites=true&w=majority`;
+
+const MONGO = {
+    host: MONGO_HOST,
+    password: MONGO_PASSWORD,
+    username: MONGO_USERNAME,
+    options: MONGO_OPTIONS,
+    url: `mongodb+srv://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}`
 };
 
 const SERVER_HOSTNAME = process.env.SERVER_HOSTNAME || 'localhost';
@@ -19,7 +29,6 @@ const SERVER_PORT = process.env.SERVER_PORT || 1337;
 const SERVER_TOKEN_EXPIRETIME = process.env.SERVER_TOKEN_EXPIRETIME || 3600;
 const SERVER_TOKEN_ISSUER = process.env.SERVER_TOKEN_ISSUER || 'coolIssuer';
 const SERVER_TOKEN_SECRET = process.env.SERVER_TOKEN_SECRET || 'superencryptedsecret';
-
 const SERVER = {
     hostname: SERVER_HOSTNAME,
     port: SERVER_PORT,
@@ -31,8 +40,10 @@ const SERVER = {
 };
 
 const config = {
-    mysql: MYSQL,
+    mongo: MONGO,
     server: SERVER
 };
 
 export default config;
+
+

@@ -1,24 +1,15 @@
 import express, { Router } from 'express';
-import postsController from '../controllers/postsController';
+import post from '../controllers/postsController';
 import extractJWT from '../middleware/extractJWT'
 
-class PostRoutes {
+const router= express.Router();
 
-    router: Router = Router();
+router.post('/post/create',extractJWT, post.createPost)
+router.put('/post/update/:id',extractJWT, post.updatePost)
+router.delete('/post/delete/:id',extractJWT, post.deletePost)
+router.get('/post/getAll',extractJWT, post.getAllPostss)
 
-    constructor() {
-        this.config();
-    }
 
-    config() {
-        this.router.get('/',extractJWT, postsController.list);
-        this.router.get('/:id',extractJWT, postsController.getOne);
-        this.router.post('/',extractJWT, postsController.create);
-        this.router.put('/:id',extractJWT, postsController.update);
-        this.router.delete('/:id',extractJWT, postsController.delete);
-    }
+export = router;
 
-}
-
-export default new PostRoutes().router;
 
