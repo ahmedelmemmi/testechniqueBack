@@ -50,7 +50,8 @@ router.use((req, res, next) => {
     next();
 });
 router.get('/',function(req,res){
-    res.sendFile(path.join('./dist/front/index.html'));
+    return "<h1> hello word</h1>"
+    // res.sendFile(path.join('./dist/front/index.html'));
     //__dirname : It will resolve to your project folder.
   });
 router.use('/posts', postsRoutes);
