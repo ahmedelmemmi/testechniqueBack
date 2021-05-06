@@ -64,7 +64,11 @@ router.use((req, res, next) => {
         message: error.message
     });
 });
+let listenPort = process.env.PORT || 3000;
 
+router.listen(listenPort, ()=> {
+  console.log("server running on port "+ listenPort);
+})
 const httpServer = http.createServer(router);
 
 httpServer.listen(config.server.port, () => logging.info(NAMESPACE, `Server is running ${config.server.hostname}:${config.server.port}`));
