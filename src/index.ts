@@ -49,7 +49,6 @@ router.use((req, res, next) => {
     next();
 });
 
-
 router.use('/posts', postsRoutes);
 router.use('/user',userRoutes)
 
