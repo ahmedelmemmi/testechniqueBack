@@ -7,6 +7,7 @@ import mongoose from 'mongoose';
 import postsRoutes from './routes/postsRoutes';
 import userRoutes from './routes/userRoutes'
 
+const path= require('path');
 const NAMESPACE = 'Server';
 const router = express();
 
@@ -48,7 +49,10 @@ router.use((req, res, next) => {
 
     next();
 });
-
+router.get('/',function(req,res){
+    res.sendFile(path.join('./dist/front/index.html'));
+    //__dirname : It will resolve to your project folder.
+  });
 router.use('/posts', postsRoutes);
 router.use('/user',userRoutes)
 
