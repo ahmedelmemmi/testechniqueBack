@@ -111,5 +111,16 @@ const getAllUsers = (req: Request, res: Response, next: NextFunction) => {
             });
         });
 };
+const getuserbyusername = (req: Request, res: Response) => {
+    let user = User.find(req.params.username, (err: any, book: any) => {
+      if (err) {
+        res.send(err);
+      } else {
+          console.log("user found");
+          
+        res.send(user);
+      }
+    });
+  };
 
-export default { validateToken, register, login, getAllUsers };
+export default { validateToken, register, login, getAllUsers,getuserbyusername };

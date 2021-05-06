@@ -5,7 +5,9 @@ import IPost from '../interfaces/post';
 const PostSchema: Schema = new Schema(
     {
         title: { type: String, required: true },
-        Description: { type: String, required: true }
+        description: { type: String, required: true },
+        publiePar: { type: String, required: true }
+
     },
     {
         timestamps: true

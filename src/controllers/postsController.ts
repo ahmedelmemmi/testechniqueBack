@@ -3,12 +3,13 @@ import mongoose from 'mongoose';
 import Post from '../models/postModel';
 
 const createPost = (req: Request, res: Response) => {
-    let { author, title } = req.body;
+    let {  title,description,publiePar } = req.body;
 
     const post = new Post({
         _id: new mongoose.Types.ObjectId(),
-        author,
-        title
+        title,
+        description,
+        publiePar
     });
 
     return post
