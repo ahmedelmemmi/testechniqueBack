@@ -12,7 +12,7 @@ class IndexRoutes {
     }
 
     config(): void {
-        this.router.get('/',extractJWT, indexController.index);
+        this.router.get('/', indexController.index);
     }
 
 }
